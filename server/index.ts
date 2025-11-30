@@ -63,7 +63,11 @@ app.get("/", (_req, res) => {
 });
 
 // In serverless (Vercel) we export the app; locally we still listen
-if (!process.env.VERCEL) {
+// On Railway, we want to listen, so check explicitly for Vercel
+if (process.env.VERCEL) {
+  // Only export for Vercel serverless
+  // No listen() call
+} else {
   app.listen(PORT, HOST, () => {
     console.log(`🚀 Server running on http://${HOST}:${PORT}`);
   });
