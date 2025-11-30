@@ -5,10 +5,11 @@ import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { useTheme } from "./theme-provider";
 
-interface OutputViewerProps {
+interface CodeEditorProps {
   value: string;
-  language: "pydantic" | "typescript";
-  isLoading: boolean;
+  onChange?: (value: string) => void;
+  language?: "pydantic" | "typescript";
+  isLoading?: boolean;
 }
 
 const LoadingSpinner: React.FC = () => (
@@ -39,31 +40,47 @@ const LoadingSpinner: React.FC = () => (
   </div>
 );
 
-export const OutputViewer: React.FC<OutputViewerProps> = ({
+export const CodeEditor: React.FC<CodeEditorProps> = ({
   value,
-  language,
-  isLoading,
+  onChange,
+  language = "typescript",
+  isLoading = false,
 }) => {
   const { theme } = useTheme();
+
+  // Resolve system theme to actual theme
+  const resolvedTheme = useMemo(() => {
+    if (theme === "system") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    return theme;
+  }, [theme]);
+
   const extensions = useMemo(
     () => [
       language === "pydantic" ? python() : javascript({ typescript: true }),
-      ...(theme === "dark" ? [oneDark] : []),
+      ...(resolvedTheme === "dark" ? [oneDark] : []),
     ],
-    [language, theme]
+    [language, resolvedTheme]
   );
 
+  const isEditable = onChange !== undefined;
+
   return (
-    <div className="relative h-full w-full overflow-auto overscroll-none">
+    <div className={`h-full w-full overflow-auto overscroll-none ${isLoading ? "relative" : ""}`}>
       {isLoading && <LoadingSpinner />}
       <CodeMirror
         value={value}
         height="100%"
         extensions={extensions}
-        theme={theme === "dark" ? "dark" : "light"}
-        editable={false}
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
+        onChange={onChange}
+        editable={isEditable}
         className="h-full"
       />
     </div>
   );
 };
+

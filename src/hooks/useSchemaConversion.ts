@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "./useDebounce";
+import { getApiBaseUrl } from "../utils/apiConfig";
 
 interface ConvertResponse {
   output: string;
@@ -12,7 +13,8 @@ const convertSchema = async (
   zodVersion: "3" | "4",
   signal?: AbortSignal
 ): Promise<ConvertResponse> => {
-  const response = await fetch("/api/convert", {
+  const apiBaseUrl = getApiBaseUrl();
+  const response = await fetch(`${apiBaseUrl}/api/convert`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

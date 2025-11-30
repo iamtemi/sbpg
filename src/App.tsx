@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { SchemaEditor } from "./components/schema-editor";
-import { OutputViewer } from "./components/output-viewer";
+import { CodeEditor } from "./components/code-editor";
 import { useSchemaConversion } from "./hooks/useSchemaConversion";
 import {
   DEFAULT_SCHEMA_V4,
@@ -9,7 +8,7 @@ import {
 } from "./utils/defaultSchema";
 import { ThemeProvider, useTheme } from "./components/theme-provider";
 import "./index.css";
-import { CircleX, MoonIcon, SunIcon } from "lucide-react";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { Footer } from "@/components/footer";
 
 function ThemeToggle() {
@@ -44,11 +43,11 @@ function AppContent() {
     setZodVersion(newVersion);
   };
 
-  const {
-    output,
-    error: conversionError,
-    isConverting,
-  } = useSchemaConversion(schemaCode, targetLanguage, zodVersion);
+  const { output, isConverting } = useSchemaConversion(
+    schemaCode,
+    targetLanguage,
+    zodVersion
+  );
 
   return (
     <div className="h-screen flex flex-col font-sans overscroll-none">
@@ -105,7 +104,7 @@ function AppContent() {
             </div>
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">
-            <SchemaEditor value={schemaCode} onChange={setSchemaCode} />
+            <CodeEditor value={schemaCode} onChange={setSchemaCode} />
           </div>
         </div>
         {/* Right Panel: Output Viewer */}
@@ -134,7 +133,7 @@ function AppContent() {
             </div>
           </div>
           <div className="flex-1 min-h-0 overflow-hidden relative">
-            <OutputViewer
+            <CodeEditor
               value={output}
               language={targetLanguage}
               isLoading={isConverting}
