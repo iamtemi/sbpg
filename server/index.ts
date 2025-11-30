@@ -3,6 +3,11 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import timeout from "connect-timeout";
 import { convertRouter } from "./routes/convert.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -48,6 +53,15 @@ app.use("/api", convertRouter);
 // Health check (no rate limit)
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
+});
+
+// Serve static files from dist directory (frontend)
+const distPath = path.join(__dirname, "..", "dist");
+app.use(express.static(distPath));
+
+// Catch-all: send React app for client-side routing
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 // Root route
