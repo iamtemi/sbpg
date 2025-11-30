@@ -18,26 +18,27 @@ const limiter = rateLimit({
 
 app.use(timeout("30s")); // Kill requests after 30 seconds
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
-  "http://localhost:5173", // Dev
-  "https://addthislater", // Production
-];
+const allowedOrigins =
+  process.env.ALLOWED_ORIGINS?.split(",") || [
+    "http://localhost:5173", // Dev
+    "https://sbpg.vercel.app", // Production (default)
+  ];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow same-origin/no-origin (e.g., curl) and explicit allowlist matches
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
 
 // Middleware
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "500kb" }));
 // Apply rate limiting to all API routes
@@ -47,12 +48,12 @@ app.use("/api", limiter);
 app.use("/api", convertRouter);
 
 // Health check (no rate limit)
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
 // Root route
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({
     message: "SchemaBridge API Server",
     status: "ok",
@@ -63,6 +64,11 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
-});
+// In serverless (Vercel) we export the app; locally we still listen
+if (!process.env.VERCEL) {
+  app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
+  });
+}
+
+export default app;
