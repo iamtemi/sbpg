@@ -18,11 +18,10 @@ const limiter = rateLimit({
 
 app.use(timeout("30s")); // Kill requests after 30 seconds
 
-const allowedOrigins =
-  process.env.ALLOWED_ORIGINS?.split(",") || [
-    "http://localhost:5173", // Dev
-    "https://sbpg.vercel.app", // Production (default)
-  ];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
+  "http://localhost:5173", // Dev
+  "https://sbpg.vercel.app", // Production (default)
+];
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
@@ -38,7 +37,6 @@ const corsOptions: cors.CorsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "500kb" }));
 // Apply rate limiting to all API routes
