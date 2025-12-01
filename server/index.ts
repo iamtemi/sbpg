@@ -60,7 +60,7 @@ const distPath = path.join(__dirname, "..", "dist");
 app.use(express.static(distPath));
 
 // Catch-all: send React app for client-side routing
-app.get("*", (_req, res) => {
+app.get("/", (_req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
